@@ -2,10 +2,12 @@ const tmi = require('tmi.js');
 const axios = require('axios');
 const qs = require('querystring');
 const readline = require('readline');
+const http = require('http');
+const { exec } = require('child_process');
 
 const webhookUrl = 'https://script.google.com/macros/s/AKfycbzAszYfxvjeazZ1hE1ax0Ks_VUjONUmBM66RS60PEh64fn9EFjKsqsP9Xo__V4Fozs/exec';
 
-let clientId = 'None';
+let clientId = 'l0yhmcda38qvxv1ht2tlkt7fdpdrz4';
 let clientSecret = 'None';
 
 async function getAccessToken() {
@@ -36,8 +38,7 @@ async function checkIfTwitchUserExists(username, accessToken) {
     }
 }
 
-async function startBot(userToken) {
-    const apiToken = await getAccessToken();
+async function startBot(userToken, apiToken) {
     const client = new tmi.Client({
         options: { debug: true },
         identity: {
@@ -87,17 +88,56 @@ async function startBot(userToken) {
         output: process.stdout
     });
 
-    rl.question('Entre le client id de ton application : ', (getClientId) => {
-        rl.question('Entre le token secret de ton application : ', async (getClientSecret) => {
-            clientId = getClientId;
+    rl.question('Entre le token secret de ton application : ', async (getClientSecret) => {
             clientSecret = getClientSecret;
             const apiToken = await getAccessToken();
-            console.log('Ouvre ce lien dans ton navigateur pour générer le token utilisateur (password) :');
-            console.log(`https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=http://localhost&response_type=token&scope=chat:read+chat:edit`);
-            rl.question('Colle ici le token utilisateur (password) puis appuie sur Entrée : ', (userToken) => {
-                rl.close();
+            
+            await getUserToken().then((userToken) => {
                 startBot(userToken, apiToken);
+                rl.close();
             });
-        });
     });
 })();
+async function getUserToken() {
+    return new Promise((resolve) => {
+        const server = http.createServer((req, res) => {
+            if (req.method === 'GET') {
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.end(`
+                    <html>
+                    <body>
+                        <script>
+                            if (window.location.hash) {
+                                fetch('/', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ hash: window.location.hash })
+                                }).then(() => {
+                                    document.body.innerText = 'Token fetched, you can close this page.';
+                                });
+                            } else {
+                                document.body.innerText = 'No token found at this URL. Did you allow on https://dev.twitch.tv/console the redirection OAuth http://localhost:3000 ?';
+                            }
+                        </script>
+                    </body>
+                    </html>
+                `);
+            } else if (req.method === 'POST') {
+                let body = '';
+                req.on('data', chunk => body += chunk);
+                req.on('end', () => {
+                    const { hash } = JSON.parse(body);
+                    const params = new URLSearchParams(hash.replace('#', ''));
+                    const token = params.get('access_token');
+                    res.end('OK');
+                    server.close();
+                    resolve(token);
+                });
+            }
+        }).listen(3000, () => {
+            const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=http://localhost:3000&response_type=token&scope=chat:read+chat:edit`;
+            exec(`start "" "${authUrl}"`);
+            console.log('Le navigateur va s’ouvrir. Waiting for the result...');
+        });
+    });
+}
