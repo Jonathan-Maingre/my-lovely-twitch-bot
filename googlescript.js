@@ -47,22 +47,6 @@ function checkUser(answer, new_user) {
     return ContentService.createTextOutput("❌ Wrong answer or user not found.");
 }
 
-function writeFather(father, new_user) {
-    let date = new Date();
-    // Vérifie si l'invité existe déjà
-    let dataRange = sheet.getRange(2, 3, sheet.getLastRow(), 1).getValues();
-    let alreadyExists = dataRange.some(function (row) {
-        return row[0].toString().toLowerCase() === new_user.toLowerCase();
-    });
-    if (!alreadyExists) {
-        sheet.appendRow([date, father, new_user]);
-        updateTop10Fathers();
-        return ContentService.createTextOutput("✅ Father recorded!");
-    } else {
-        return ContentService.createTextOutput("❌ You already have a father");
-    }
-}
-
 function updateTop10Fathers() {
     SpreadsheetApp.flush();
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -75,12 +59,10 @@ function updateTop10Fathers() {
     const data = sourceSheet.getDataRange().getValues();
     const fatherCounts = {};
     for (let i = 1; i < data.length; i++) {
-        // Vérifie la colonne VALIDATE_USER (colonne D, index 3)
-        if (data[i][3] === "X" || data[i][3] === "x") {
-            const father = data[i][1]; // Colonne B = FATHER
-            if (father) {
-                fatherCounts[father] = (fatherCounts[father] || 0) + 1;
-            }
+        // Colonne D = VALIDATE_USER, Colonne B = FATHER
+        if ((data[i][3] === "X" || data[i][3] === "x") && data[i][1]) {
+            const father = data[i][1];
+            fatherCounts[father] = (fatherCounts[father] || 0) + 1;
         }
     }
     const sortedFathers = Object.entries(fatherCounts)

@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b213db53-0103-47e0-969c-14b0852ed2c4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MyLovelyBot/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MyLovelyBot/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot.js" beforeDir="false" afterPath="$PROJECT_DIR$/bot.js" afterDir="false" />
-    </list>
+    <list default="true" id="b213db53-0103-47e0-969c-14b0852ed2c4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -17,6 +14,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="TypeScript File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -57,6 +55,7 @@
       <workItem from="1754574286467" duration="5940000" />
       <workItem from="1754637085642" duration="7645000" />
       <workItem from="1755083251221" duration="3849000" />
+      <workItem from="1755159736875" duration="21259000" />
     </task>
     <servers />
   </component>
