@@ -21,6 +21,23 @@ function doPost(e) {
     }
 }
 
+function writeFather(father, new_user) {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("REFERRALMLP");
+    let date = new Date();
+    // Vérifie si l'invité existe déjà
+    let dataRange = sheet.getRange(2, 3, sheet.getLastRow(), 1).getValues();
+    let alreadyExists = dataRange.some(function (row) {
+        return row[0].toString().toLowerCase() === new_user.toLowerCase();
+    });
+    if (!alreadyExists) {
+        sheet.appendRow([date, father, new_user]);
+        updateTop10Fathers();
+        return ContentService.createTextOutput("✅ Father recorded!");
+    } else {
+        return ContentService.createTextOutput("❌ You already have a father");
+    }
+}
+
 // Vérifie la réponse et valide l'utilisateur si elle est correcte
 function checkUser(answer, new_user) {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("REFERRALMLP");
@@ -44,7 +61,7 @@ function checkUser(answer, new_user) {
             return ContentService.createTextOutput("✅ User validated !");
         }
     }
-    return ContentService.createTextOutput("❌ Wrong answer or user not found.");
+    return ContentService.createTextOutput("❌ Wrong answer or user don't have a father");
 }
 
 function updateTop10Fathers() {
